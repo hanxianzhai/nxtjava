@@ -16,7 +16,7 @@ final class TransactionImpl implements Transaction {
     private final short deadline;
     private final byte[] senderPublicKey;
     private final Long recipientId;
-    private final int amount;
+    private final Long amount;
     private final int fee;
     private final Long referencedTransactionId;
     private final TransactionType type;
@@ -34,7 +34,7 @@ final class TransactionImpl implements Transaction {
     private volatile String hash;
 
     TransactionImpl(TransactionType type, int timestamp, short deadline, byte[] senderPublicKey, Long recipientId,
-                    int amount, int fee, Long referencedTransactionId, byte[] signature) throws NxtException.ValidationException {
+                    Long amount, int fee, Long referencedTransactionId, byte[] signature) throws NxtException.ValidationException {
 
         if ((timestamp == 0 && Arrays.equals(senderPublicKey, Genesis.CREATOR_PUBLIC_KEY)) ? (deadline != 0 || fee != 0) : (deadline < 1 || fee <= 0)
                 || fee > Constants.MAX_BALANCE || amount < 0 || amount > Constants.MAX_BALANCE || type == null) {
@@ -55,7 +55,7 @@ final class TransactionImpl implements Transaction {
     }
 
     TransactionImpl(TransactionType type, int timestamp, short deadline, byte[] senderPublicKey, Long recipientId,
-                    int amount, int fee, Long referencedTransactionId, byte[] signature, Long blockId, int height,
+                    Long amount, int fee, Long referencedTransactionId, byte[] signature, Long blockId, int height,
                     Long id, Long senderId, Attachment attachment, byte[] hash, int blockTimestamp)
             throws NxtException.ValidationException {
         this(type, timestamp, deadline, senderPublicKey, recipientId, amount, fee, referencedTransactionId, signature);
@@ -84,7 +84,7 @@ final class TransactionImpl implements Transaction {
     }
 
     @Override
-    public int getAmount() {
+    public Long getAmount() {
         return amount;
     }
 
@@ -222,7 +222,7 @@ final class TransactionImpl implements Transaction {
 
     }
 
-    static final int TRANSACTION_BYTES_LENGTH = 1 + 1 + 4 + 2 + 32 + 8 + 4 + 4 + 8 + 64;
+    static final int TRANSACTION_BYTES_LENGTH = 1 + 1 + 4 + 2 + 32 + 8 + 8 + 4 + 8 + 64;
 
     int getSize() {
         return TRANSACTION_BYTES_LENGTH + (attachment == null ? 0 : attachment.getSize());
@@ -239,7 +239,7 @@ final class TransactionImpl implements Transaction {
         buffer.putShort(deadline);
         buffer.put(senderPublicKey);
         buffer.putLong(Convert.nullToZero(recipientId));
-        buffer.putInt(amount);
+        buffer.putLong(amount);
         buffer.putInt(fee);
         buffer.putLong(Convert.nullToZero(referencedTransactionId));
         buffer.put(signature != null ? signature : new byte[64]);
@@ -284,7 +284,7 @@ final class TransactionImpl implements Transaction {
     public String getHash() {
         if (hash == null) {
             byte[] data = getBytes();
-            for (int i = 64; i < 128; i++) {
+            for (int i = 64; i < 132; i++) {
                 data[i] = 0;
             }
             hash = Convert.toHexString(Crypto.sha256().digest(data));
@@ -308,7 +308,7 @@ final class TransactionImpl implements Transaction {
             return false;
         }
         byte[] data = getBytes();
-        for (int i = 64; i < 128; i++) {
+        for (int i = 64; i < 132; i++) {
             data[i] = 0;
         }
         return Crypto.verify(signature, data, senderPublicKey) && account.setOrVerify(senderPublicKey, this.getHeight());

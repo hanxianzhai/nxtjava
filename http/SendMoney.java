@@ -41,9 +41,9 @@ public final class SendMoney extends CreateTransaction {
             return INCORRECT_RECIPIENT;
         }
 
-        int amount;
+        Long amount;
         try {
-            amount = Integer.parseInt(amountValue);
+            amount = Long.parseLong(amountValue);
             if (amount <= 0 || amount >= Constants.MAX_BALANCE) {
                 return INCORRECT_AMOUNT;
             }

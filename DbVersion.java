@@ -62,7 +62,7 @@ final class DbVersion {
             case 1:
                 apply("CREATE TABLE IF NOT EXISTS block (db_id INT IDENTITY, id BIGINT NOT NULL, version INT NOT NULL, "
                         + "timestamp INT NOT NULL, previous_block_id BIGINT, "
-                        + "FOREIGN KEY (previous_block_id) REFERENCES block (id) ON DELETE CASCADE, total_amount INT NOT NULL, "
+                        + "FOREIGN KEY (previous_block_id) REFERENCES block (id) ON DELETE CASCADE, total_amount BIGINT NOT NULL, "
                         + "total_fee INT NOT NULL, payload_length INT NOT NULL, generator_public_key BINARY(32) NOT NULL, "
                         + "previous_block_hash BINARY(32), cumulative_difficulty VARBINARY NOT NULL, base_target BIGINT NOT NULL, "
                         + "next_block_id BIGINT, FOREIGN KEY (next_block_id) REFERENCES block (id) ON DELETE SET NULL, "
@@ -73,7 +73,7 @@ final class DbVersion {
             case 3:
                 apply("CREATE TABLE IF NOT EXISTS transaction (db_id INT IDENTITY, id BIGINT NOT NULL, "
                         + "deadline SMALLINT NOT NULL, sender_public_key BINARY(32) NOT NULL, recipient_id BIGINT NOT NULL, "
-                        + "amount INT NOT NULL, fee INT NOT NULL, referenced_transaction_id BIGINT, index INT NOT NULL, "
+                        + "amount BIGINT NOT NULL, fee INT NOT NULL, referenced_transaction_id BIGINT, index INT NOT NULL, "
                         + "height INT NOT NULL, block_id BIGINT NOT NULL, FOREIGN KEY (block_id) REFERENCES block (id) ON DELETE CASCADE, "
                         + "signature BINARY(64) NOT NULL, timestamp INT NOT NULL, type TINYINT NOT NULL, subtype TINYINT NOT NULL, "
                         + "sender_account_id BIGINT NOT NULL, attachment OTHER)");
@@ -139,7 +139,7 @@ final class DbVersion {
                         BlockImpl block = iterator.next();
                         BlockchainImpl.getInstance().setLastBlock(block);
                         for (TransactionImpl transaction : block.getTransactions()) {
-                            try {
+                           try {
                                 transaction.validateAttachment();
                             } catch (RuntimeException|NxtException.ValidationException e) {
                                 Logger.logDebugMessage("Failed to validate transaction: " + e.toString());
@@ -151,7 +151,7 @@ final class DbVersion {
                     }
                 }
                 apply(null);
-            case 24:
+            case 24:            	
                 return;
             default:
                 throw new RuntimeException("Database inconsistent with code, probably trying to run older code on newer database");

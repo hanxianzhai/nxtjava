@@ -68,7 +68,7 @@ final class TransactionDb {
             short deadline = rs.getShort("deadline");
             byte[] senderPublicKey = rs.getBytes("sender_public_key");
             Long recipientId = rs.getLong("recipient_id");
-            int amount = rs.getInt("amount");
+            Long amount = rs.getLong("amount");
             int fee = rs.getInt("fee");
             Long referencedTransactionId = rs.getLong("referenced_transaction_id");
             if (rs.wasNull()) {
@@ -121,7 +121,7 @@ final class TransactionDb {
                     pstmt.setShort(++i, transaction.getDeadline());
                     pstmt.setBytes(++i, transaction.getSenderPublicKey());
                     pstmt.setLong(++i, transaction.getRecipientId());
-                    pstmt.setInt(++i, transaction.getAmount());
+                    pstmt.setLong(++i, transaction.getAmount());
                     pstmt.setInt(++i, transaction.getFee());
                     if (transaction.getReferencedTransactionId() != null) {
                         pstmt.setLong(++i, transaction.getReferencedTransactionId());

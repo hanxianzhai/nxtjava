@@ -22,7 +22,7 @@ final class BlockImpl implements Block {
     private final Long previousBlockId;
     private final byte[] generatorPublicKey;
     private final byte[] previousBlockHash;
-    private final int totalAmount;
+    private final Long totalAmount;
     private final int totalFee;
     private final int payloadLength;
     private final byte[] generationSignature;
@@ -40,7 +40,7 @@ final class BlockImpl implements Block {
     private volatile Long generatorId;
 
 
-    BlockImpl(int version, int timestamp, Long previousBlockId, int totalAmount, int totalFee, int payloadLength, byte[] payloadHash,
+    BlockImpl(int version, int timestamp, Long previousBlockId, Long totalAmount2, int totalFee, int payloadLength, byte[] payloadHash,
               byte[] generatorPublicKey, byte[] generationSignature, byte[] blockSignature, byte[] previousBlockHash, List<TransactionImpl> transactions)
             throws NxtException.ValidationException {
 
@@ -55,7 +55,7 @@ final class BlockImpl implements Block {
         this.version = version;
         this.timestamp = timestamp;
         this.previousBlockId = previousBlockId;
-        this.totalAmount = totalAmount;
+        this.totalAmount = totalAmount2;
         this.totalFee = totalFee;
         this.payloadLength = payloadLength;
         this.payloadHash = payloadHash;
@@ -78,7 +78,7 @@ final class BlockImpl implements Block {
 
     }
 
-    BlockImpl(int version, int timestamp, Long previousBlockId, int totalAmount, int totalFee, int payloadLength, byte[] payloadHash,
+    BlockImpl(int version, int timestamp, Long previousBlockId, Long totalAmount, int totalFee, int payloadLength, byte[] payloadHash,
               byte[] generatorPublicKey, byte[] generationSignature, byte[] blockSignature, byte[] previousBlockHash, List<TransactionImpl> transactions,
               BigInteger cumulativeDifficulty, long baseTarget, Long nextBlockId, int height, Long id)
             throws NxtException.ValidationException {
@@ -117,7 +117,7 @@ final class BlockImpl implements Block {
     }
 
     @Override
-    public int getTotalAmount() {
+    public Long getTotalAmount() {
         return totalAmount;
     }
 
@@ -224,13 +224,13 @@ final class BlockImpl implements Block {
 
     byte[] getBytes() {
 
-        ByteBuffer buffer = ByteBuffer.allocate(4 + 4 + 8 + 4 + 4 + 4 + 4 + 32 + 32 + (32 + 32) + 64);
+        ByteBuffer buffer = ByteBuffer.allocate(4 + 4 + 8 + 4 + 8 + 4 + 4 + 32 + 32 + (32 + 32) + 64);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         buffer.putInt(version);
         buffer.putInt(timestamp);
         buffer.putLong(Convert.nullToZero(previousBlockId));
         buffer.putInt(blockTransactions.size());
-        buffer.putInt(totalAmount);
+        buffer.putLong(totalAmount);
         buffer.putInt(totalFee);
         buffer.putInt(payloadLength);
         buffer.put(payloadHash);

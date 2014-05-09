@@ -58,7 +58,7 @@ public final class Peers {
     static final int readTimeout;
     static final int blacklistingPeriod;
 
-    static final int DEFAULT_PEER_PORT = 7874;
+    static final int DEFAULT_PEER_PORT = 7871;
     static final int TESTNET_PEER_PORT = 6874;
     private static final String myPlatform;
     private static final String myAddress;
@@ -84,17 +84,17 @@ public final class Peers {
 
     static {
 
-        myPlatform = Nxt.getStringProperty("nxt.myPlatform");
-        myAddress = Nxt.getStringProperty("nxt.myAddress");
+        myPlatform = Nxt.getStringProperty("nas.myPlatform");
+        myAddress = Nxt.getStringProperty("nas.myAddress");
         if (myAddress != null && myAddress.endsWith(":" + TESTNET_PEER_PORT) && ! Constants.isTestnet) {
             throw new RuntimeException("Port " + TESTNET_PEER_PORT + " should only be used for testnet!!!");
         }
-        myPeerServerPort = Nxt.getIntProperty("nxt.peerServerPort");
+        myPeerServerPort = Nxt.getIntProperty("nas.peerServerPort");
         if (myPeerServerPort == TESTNET_PEER_PORT && ! Constants.isTestnet) {
             throw new RuntimeException("Port " + TESTNET_PEER_PORT + " should only be used for testnet!!!");
         }
-        shareMyAddress = Nxt.getBooleanProperty("nxt.shareMyAddress");
-        myHallmark = Nxt.getStringProperty("nxt.myHallmark");
+        shareMyAddress = Nxt.getBooleanProperty("nas.shareMyAddress");
+        myHallmark = Nxt.getStringProperty("nas.myHallmark");
         if (Peers.myHallmark != null && Peers.myHallmark.length() > 0) {
             try {
                 Hallmark hallmark = Hallmark.parseHallmark(Peers.myHallmark);
@@ -137,13 +137,13 @@ public final class Peers {
         myPeerInfoRequest = JSON.prepareRequest(json);
 
         Set<String> addresses = new HashSet<>();
-        List<String> wellKnownPeersList = Constants.isTestnet ? Nxt.getStringListProperty("nxt.testnetPeers")
-                : Nxt.getStringListProperty("nxt.wellKnownPeers");
+        List<String> wellKnownPeersList = Constants.isTestnet ? Nxt.getStringListProperty("nas.testnetPeers")
+                : Nxt.getStringListProperty("nas.wellKnownPeers");
         if (! wellKnownPeersList.isEmpty()) {
             addresses.addAll(wellKnownPeersList);
         } else if (! Constants.isTestnet) {
             Logger.logMessage("No wellKnownPeers defined, using random nxtcrypto.org, nxtbase.com and mynxt.info nodes");
-            for (int i = 1; i <= 12; i++) {
+            /*for (int i = 1; i <= 12; i++) {
                 if (ThreadLocalRandom.current().nextInt(4) == 1) {
                     addresses.add("vps" + i + ".nxtcrypto.org");
                 }
@@ -157,27 +157,28 @@ public final class Peers {
                 if (ThreadLocalRandom.current().nextInt(4) == 1) {
                     addresses.add("node" + i + ".mynxt.info");
                 }
-            }
+            }*/
+            addresses.add("nascoin.no-ip.biz");
         }
         wellKnownPeers = Collections.unmodifiableSet(addresses);
 
-        List<String> knownBlacklistedPeersList = Nxt.getStringListProperty("nxt.knownBlacklistedPeers");
+        List<String> knownBlacklistedPeersList = Nxt.getStringListProperty("nas.knownBlacklistedPeers");
         if (knownBlacklistedPeersList.isEmpty()) {
             knownBlacklistedPeers = Collections.emptySet();
         } else {
             knownBlacklistedPeers = Collections.unmodifiableSet(new HashSet<>(knownBlacklistedPeersList));
         }
 
-        maxNumberOfConnectedPublicPeers = Nxt.getIntProperty("nxt.maxNumberOfConnectedPublicPeers");
-        connectTimeout = Nxt.getIntProperty("nxt.connectTimeout");
-        readTimeout = Nxt.getIntProperty("nxt.readTimeout");
-        enableHallmarkProtection = Nxt.getBooleanProperty("nxt.enableHallmarkProtection");
-        pushThreshold = Nxt.getIntProperty("nxt.pushThreshold");
-        pullThreshold = Nxt.getIntProperty("nxt.pullThreshold");
+        maxNumberOfConnectedPublicPeers = Nxt.getIntProperty("nas.maxNumberOfConnectedPublicPeers");
+        connectTimeout = Nxt.getIntProperty("nas.connectTimeout");
+        readTimeout = Nxt.getIntProperty("nas.readTimeout");
+        enableHallmarkProtection = Nxt.getBooleanProperty("nas.enableHallmarkProtection");
+        pushThreshold = Nxt.getIntProperty("nas.pushThreshold");
+        pullThreshold = Nxt.getIntProperty("nas.pullThreshold");
 
-        blacklistingPeriod = Nxt.getIntProperty("nxt.blacklistingPeriod");
-        communicationLoggingMask = Nxt.getIntProperty("nxt.communicationLoggingMask");
-        sendToPeersLimit = Nxt.getIntProperty("nxt.sendToPeersLimit");
+        blacklistingPeriod = Nxt.getIntProperty("nas.blacklistingPeriod");
+        communicationLoggingMask = Nxt.getIntProperty("nas.communicationLoggingMask");
+        sendToPeersLimit = Nxt.getIntProperty("nas.sendToPeersLimit");
 
         StringBuilder buf = new StringBuilder();
         for (String address : wellKnownPeers) {
@@ -200,18 +201,18 @@ public final class Peers {
                 ServerConnector connector = new ServerConnector(peerServer);
                 final int port = Constants.isTestnet ? TESTNET_PEER_PORT : Peers.myPeerServerPort;
                 connector.setPort(port);
-                final String host = Nxt.getStringProperty("nxt.peerServerHost");
+                final String host = Nxt.getStringProperty("nas.peerServerHost");
                 connector.setHost(host);
-                connector.setIdleTimeout(Nxt.getIntProperty("nxt.peerServerIdleTimeout"));
+                connector.setIdleTimeout(Nxt.getIntProperty("nas.peerServerIdleTimeout"));
                 peerServer.addConnector(connector);
 
                 ServletHandler peerHandler = new ServletHandler();
                 peerHandler.addServletWithMapping(PeerServlet.class, "/*");
-                if (Nxt.getBooleanProperty("nxt.enablePeerServerDoSFilter")) {
+                if (Nxt.getBooleanProperty("nas.enablePeerServerDoSFilter")) {
                     FilterHolder filterHolder = peerHandler.addFilterWithMapping(DoSFilter.class, "/*", FilterMapping.DEFAULT);
-                    filterHolder.setInitParameter("maxRequestsPerSec", Nxt.getStringProperty("nxt.peerServerDoSFilter.maxRequestsPerSec"));
-                    filterHolder.setInitParameter("delayMs", Nxt.getStringProperty("nxt.peerServerDoSFilter.delayMs"));
-                    filterHolder.setInitParameter("maxRequestMs", Nxt.getStringProperty("nxt.peerServerDoSFilter.maxRequestMs"));
+                    filterHolder.setInitParameter("maxRequestsPerSec", Nxt.getStringProperty("nas.peerServerDoSFilter.maxRequestsPerSec"));
+                    filterHolder.setInitParameter("delayMs", Nxt.getStringProperty("nas.peerServerDoSFilter.delayMs"));
+                    filterHolder.setInitParameter("maxRequestMs", Nxt.getStringProperty("nas.peerServerDoSFilter.maxRequestMs"));
                     filterHolder.setInitParameter("trackSessions", "false");
                     filterHolder.setAsyncSupported(true);
                 }

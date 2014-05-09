@@ -16,33 +16,33 @@ import java.util.Properties;
 
 public final class Nxt {
 
-    public static final String VERSION = "0.8.13";
+    public static final String VERSION = "0.8.13.N1";
 
     private static final Properties defaultProperties = new Properties();
     static {
-        System.out.println("Initializing Nxt server version " + Nxt.VERSION);
-        try (InputStream is = ClassLoader.getSystemResourceAsStream("nxt-default.properties")) {
+        System.out.println("Initializing Nas server version " + Nxt.VERSION);
+        try (InputStream is = ClassLoader.getSystemResourceAsStream("nas-default.properties")) {
             if (is != null) {
                 Nxt.defaultProperties.load(is);
             } else {
-                String configFile = System.getProperty("nxt-default.properties");
+                String configFile = System.getProperty("nas-default.properties");
                 if (configFile != null) {
                     try (InputStream fis = new FileInputStream(configFile)) {
                         Nxt.defaultProperties.load(fis);
                     } catch (IOException e) {
-                        throw new RuntimeException("Error loading nxt-default.properties from " + configFile);
+                        throw new RuntimeException("Error loading nas-default.properties from " + configFile);
                     }
                 } else {
-                    throw new RuntimeException("nxt-default.properties not in classpath and system property nxt-default.properties not defined either");
+                    throw new RuntimeException("nas-default.properties not in classpath and system property nxt-default.properties not defined either");
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException("Error loading nxt-default.properties", e);
+            throw new RuntimeException("Error loading nas-default.properties", e);
         }
     }
     private static final Properties properties = new Properties(defaultProperties);
     static {
-        try (InputStream is = ClassLoader.getSystemResourceAsStream("nxt.properties")) {
+        try (InputStream is = ClassLoader.getSystemResourceAsStream("nas.properties")) {
             if (is != null) {
                 Nxt.properties.load(is);
             } // ignore if missing
@@ -139,7 +139,7 @@ public final class Nxt {
         TransactionProcessorImpl.getInstance().shutdown();
         ThreadPool.shutdown();
         Db.shutdown();
-        Logger.logMessage("Nxt server " + VERSION + " stopped.");
+        Logger.logMessage("Nas server " + VERSION + " stopped.");
     }
 
     private static class Init {
@@ -150,7 +150,7 @@ public final class Nxt {
 
             Logger.logMessage("logging enabled");
 
-            if (! Nxt.getBooleanProperty("nxt.debugJetty")) {
+            if (! Nxt.getBooleanProperty("nas.debugJetty")) {
                 System.setProperty("org.eclipse.jetty.LEVEL", "OFF");
                 Logger.logDebugMessage("jetty logging disabled");
             }
@@ -168,7 +168,12 @@ public final class Nxt {
 
             long currentTime = System.currentTimeMillis();
             Logger.logDebugMessage("Initialization took " + (currentTime - startTime) / 1000 + " seconds");
-            Logger.logMessage("Nxt server " + VERSION + " started successfully.");
+            Logger.logMessage("Nas server " + VERSION + " started successfully.");
+            
+            Logger.logMessage("");
+            Logger.logMessage("Nas.url = http://localhost:7875");
+            Logger.logMessage("");
+            Logger.logMessage("Thanks for the Nxt community!");
             if (Constants.isTestnet) {
                 Logger.logMessage("RUNNING ON TESTNET - DO NOT USE REAL ACCOUNTS!");
             }

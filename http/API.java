@@ -34,21 +34,21 @@ public final class API {
     private static final Server apiServer;
 
     static {
-        List<String> allowedBotHostsList = Nxt.getStringListProperty("nxt.allowedBotHosts");
+        List<String> allowedBotHostsList = Nxt.getStringListProperty("nas.allowedBotHosts");
         if (! allowedBotHostsList.contains("*")) {
             allowedBotHosts = Collections.unmodifiableSet(new HashSet<>(allowedBotHostsList));
         } else {
             allowedBotHosts = null;
         }
 
-        boolean enableAPIServer = Nxt.getBooleanProperty("nxt.enableAPIServer");
+        boolean enableAPIServer = Nxt.getBooleanProperty("nas.enableAPIServer");
         if (enableAPIServer) {
-            final int port = Constants.isTestnet ? TESTNET_API_PORT : Nxt.getIntProperty("nxt.apiServerPort");
-            final String host = Nxt.getStringProperty("nxt.apiServerHost");
+            final int port = Constants.isTestnet ? TESTNET_API_PORT : Nxt.getIntProperty("nas.apiServerPort");
+            final String host = Nxt.getStringProperty("nas.apiServerHost");
             apiServer = new Server();
             ServerConnector connector;
 
-            boolean enableSSL = Nxt.getBooleanProperty("nxt.apiSSL");
+            boolean enableSSL = Nxt.getBooleanProperty("nas.apiSSL");
             if (enableSSL) {
                 Logger.logMessage("Using SSL (https) for the API server");
                 HttpConfiguration https_config = new HttpConfiguration();
@@ -56,8 +56,8 @@ public final class API {
                 https_config.setSecurePort(port);
                 https_config.addCustomizer(new SecureRequestCustomizer());
                 SslContextFactory sslContextFactory = new SslContextFactory();
-                sslContextFactory.setKeyStorePath(Nxt.getStringProperty("nxt.keyStorePath"));
-                sslContextFactory.setKeyStorePassword(Nxt.getStringProperty("nxt.keyStorePassword"));
+                sslContextFactory.setKeyStorePath(Nxt.getStringProperty("nas.keyStorePath"));
+                sslContextFactory.setKeyStorePassword(Nxt.getStringProperty("nas.keyStorePassword"));
                 sslContextFactory.setExcludeCipherSuites("SSL_RSA_WITH_DES_CBC_SHA", "SSL_DHE_RSA_WITH_DES_CBC_SHA",
                         "SSL_DHE_DSS_WITH_DES_CBC_SHA", "SSL_RSA_EXPORT_WITH_RC4_40_MD5", "SSL_RSA_EXPORT_WITH_DES40_CBC_SHA",
                         "SSL_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA", "SSL_DHE_DSS_EXPORT_WITH_DES40_CBC_SHA");
@@ -69,12 +69,12 @@ public final class API {
 
             connector.setPort(port);
             connector.setHost(host);
-            connector.setIdleTimeout(Nxt.getIntProperty("nxt.apiServerIdleTimeout"));
+            connector.setIdleTimeout(Nxt.getIntProperty("nas.apiServerIdleTimeout"));
             apiServer.addConnector(connector);
 
             HandlerList apiHandlers = new HandlerList();
 
-            String apiResourceBase = Nxt.getStringProperty("nxt.apiResourceBase");
+            String apiResourceBase = Nxt.getStringProperty("nas.apiResourceBase");
             if (apiResourceBase != null) {
                 ResourceHandler apiFileHandler = new ResourceHandler();
                 apiFileHandler.setDirectoriesListed(true);
@@ -83,7 +83,7 @@ public final class API {
                 apiHandlers.addHandler(apiFileHandler);
             }
 
-            String javadocResourceBase = Nxt.getStringProperty("nxt.javadocResourceBase");
+            String javadocResourceBase = Nxt.getStringProperty("nas.javadocResourceBase");
             if (javadocResourceBase != null) {
                 ContextHandler contextHandler = new ContextHandler("/doc");
                 ResourceHandler docFileHandler = new ResourceHandler();
@@ -98,7 +98,7 @@ public final class API {
             apiHandler.addServletWithMapping(APIServlet.class, "/nxt");
             apiHandler.addServletWithMapping(APITestServlet.class, "/test");
 
-            if (Nxt.getBooleanProperty("nxt.apiServerCORS")) {
+            if (Nxt.getBooleanProperty("nas.apiServerCORS")) {
                 FilterHolder filterHolder = apiHandler.addFilterWithMapping(CrossOriginFilter.class, "/*", FilterMapping.DEFAULT);
                 filterHolder.setInitParameter("allowedHeaders", "*");
                 filterHolder.setAsyncSupported(true);

@@ -1,5 +1,6 @@
 package nxt.http;
 
+import nxt.Account;
 import nxt.Nxt;
 import nxt.Transaction;
 import nxt.util.Convert;
@@ -10,6 +11,9 @@ import org.json.simple.JSONStreamAware;
 import javax.servlet.http.HttpServletRequest;
 
 import static nxt.http.JSONResponses.INCORRECT_ACCOUNT;
+import static nxt.http.JSONResponses.MISSING_ACCOUNT;
+import static nxt.http.JSONResponses.MISSING_TIMESTAMP;
+import static nxt.http.JSONResponses.UNKNOWN_ACCOUNT;
 
 public final class GetUnconfirmedTransactionIds extends APIServlet.APIRequestHandler {
 
@@ -21,7 +25,7 @@ public final class GetUnconfirmedTransactionIds extends APIServlet.APIRequestHan
 
     @Override
     JSONStreamAware processRequest(HttpServletRequest req) {
-
+    	
         String accountIdString = Convert.emptyToNull(req.getParameter("account"));
         Long accountId = null;
 
@@ -31,13 +35,13 @@ public final class GetUnconfirmedTransactionIds extends APIServlet.APIRequestHan
             } catch (RuntimeException e) {
                 return INCORRECT_ACCOUNT;
             }
-        }
+        }   	
 
         JSONArray transactionIds = new JSONArray();
         for (Transaction transaction : Nxt.getTransactionProcessor().getAllUnconfirmedTransactions()) {
             if (accountId != null && ! (accountId.equals(transaction.getSenderId()) || accountId.equals(transaction.getRecipientId()))) {
                 continue;
-            }
+            }        	
             transactionIds.add(transaction.getStringId());
         }
 

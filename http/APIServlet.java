@@ -44,7 +44,7 @@ public final class APIServlet extends HttpServlet {
 
     }
 
-    private static final boolean enforcePost = Nxt.getBooleanProperty("nxt.apiServerEnforcePOST");
+    private static final boolean enforcePost = Nxt.getBooleanProperty("nas.apiServerEnforcePOST");
 
     static final Map<String,APIRequestHandler> apiRequestHandlers;
 

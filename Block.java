@@ -27,7 +27,7 @@ public interface Block {
 
     Long getNextBlockId();
 
-    int getTotalAmount();
+    Long getTotalAmount();
 
     int getTotalFee();
 

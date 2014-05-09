@@ -58,7 +58,7 @@ public final class SendMessage extends CreateTransaction {
         }
 
         Attachment attachment = new Attachment.MessagingArbitraryMessage(message);
-        return createTransaction(req, account, recipient, 0, attachment);
+        return createTransaction(req, account, recipient, 0L, attachment);
 
     }
 

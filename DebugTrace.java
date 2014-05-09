@@ -19,8 +19,8 @@ import java.util.Set;
 public final class DebugTrace {
 
     static void init() {
-        List<String> accountIds = Nxt.getStringListProperty("nxt.debugTraceAccounts");
-        String logName = Nxt.getStringProperty("nxt.debugTraceLog");
+        List<String> accountIds = Nxt.getStringListProperty("nas.debugTraceAccounts");
+        String logName = Nxt.getStringProperty("nas.debugTraceLog");
         if (accountIds.isEmpty() || logName == null) {
             return;
         }
@@ -57,13 +57,13 @@ public final class DebugTrace {
         Account.addAssetListener(new Listener<Account.AccountAsset>() {
             @Override
             public void notify(Account.AccountAsset accountAsset) {
-                debugTrace.trace(accountAsset, false);
+            	debugTrace.trace(accountAsset, false);
             }
         }, Account.Event.ASSET_BALANCE);
         Account.addAssetListener(new Listener<Account.AccountAsset>() {
             @Override
             public void notify(Account.AccountAsset accountAsset) {
-                debugTrace.trace(accountAsset, true);
+            	debugTrace.trace(accountAsset, true);
             }
         }, Account.Event.UNCONFIRMED_ASSET_BALANCE);
         Nxt.getBlockchainProcessor().addListener(new Listener<Block>() {
@@ -147,10 +147,10 @@ public final class DebugTrace {
     }
 
     private void trace(Account.AccountAsset accountAsset, boolean unconfirmed) {
-        if (! include(accountAsset.accountId)) {
+    	if (! include(accountAsset.accountId)) {
             return;
         }
-        log(getValues(accountAsset.accountId, accountAsset, unconfirmed));
+    	log(getValues(accountAsset.accountId, accountAsset, unconfirmed));
     }
 
     private void trace(Block block, boolean isUndo) {
@@ -209,7 +209,7 @@ public final class DebugTrace {
             }
         }
         if (fee == 0 && amount == 0) {
-            return Collections.emptyMap();
+        	return Collections.emptyMap();
         }
         Map<String,String> map = getValues(accountId);
         map.put("transaction amount", String.valueOf(amount * 100L));
@@ -237,7 +237,7 @@ public final class DebugTrace {
         Map<String,String> map = new HashMap<>();
         map.put("account", Convert.toUnsignedLong(accountId));
         map.put("asset", Convert.toUnsignedLong(accountAsset.assetId));
-        map.put(unconfirmed ? "unconfirmed asset balance" : "asset balance", String.valueOf(Convert.nullToZero(accountAsset.quantity)));
+        map.put(unconfirmed ? "unconfirmed asset balance" : "asset balance", String.valueOf(Convert.nullToZero(accountAsset.quantity)));        
         map.put("timestamp", String.valueOf(Nxt.getBlockchain().getLastBlock().getTimestamp()));
         map.put("event", "asset balance");
         return map;

@@ -28,7 +28,7 @@ public interface Transaction extends Comparable<Transaction> {
 
     int getExpiration();
 
-    int getAmount();
+    Long getAmount();
 
     int getFee();
 

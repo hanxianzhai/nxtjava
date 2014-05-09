@@ -438,7 +438,7 @@ public interface Attachment {
                 Logger.logMessage("Error in getBytes", e);
                 return null;
             }
-
+            
         }
 
         @Override
@@ -469,7 +469,7 @@ public interface Attachment {
         public String getComment() {
             return comment;
         }
-
+        
     }
 
     abstract static class ColoredCoinsOrderPlacement implements Attachment, Serializable {

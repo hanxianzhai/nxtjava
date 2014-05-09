@@ -31,11 +31,11 @@ public final class Logger {
 
     private static final PrintWriter fileLog;
     static {
-        debug = Nxt.getBooleanProperty("nxt.debug");
-        enableStackTraces = Nxt.getBooleanProperty("nxt.enableStackTraces");
+        debug = Nxt.getBooleanProperty("nas.debug");
+        enableStackTraces = Nxt.getBooleanProperty("nas.enableStackTraces");
         PrintWriter printWriter = null;
         try {
-            printWriter = new PrintWriter((new BufferedWriter(new OutputStreamWriter(new FileOutputStream(Nxt.getStringProperty("nxt.log"))))), true);
+            printWriter = new PrintWriter((new BufferedWriter(new OutputStreamWriter(new FileOutputStream(Nxt.getStringProperty("nas.log"))))), true);
         } catch (IOException|RuntimeException e) {
             logMessage("Logging to file not possible, will log to stdout only", e);
         }

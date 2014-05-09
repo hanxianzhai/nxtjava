@@ -24,7 +24,7 @@ public final class TransferAsset extends CreateTransaction {
     static final TransferAsset instance = new TransferAsset();
 
     private TransferAsset() {
-        super("recipient", "asset", "quantity", "comment");
+    	super("recipient", "asset", "quantity", "comment");
     }
 
     @Override
@@ -69,8 +69,8 @@ public final class TransferAsset extends CreateTransaction {
 
         if (comment.length() > Constants.MAX_ASSET_TRANSFER_COMMENT_LENGTH) {
             return INCORRECT_ASSET_TRANSFER_COMMENT;
-        }
-
+        }       
+        
         Account account = getAccount(req);
         if (account == null) {
             return UNKNOWN_ACCOUNT;
@@ -82,7 +82,7 @@ public final class TransferAsset extends CreateTransaction {
         }
 
         Attachment attachment = new Attachment.ColoredCoinsAssetTransfer(asset, quantity, comment);
-        return createTransaction(req, account, recipient, 0, attachment);
+        return createTransaction(req, account, recipient, 0L, attachment);
 
     }
 

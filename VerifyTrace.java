@@ -39,7 +39,7 @@ public final class VerifyTrace {
     }
 
     public static void main(String[] args) {
-        String fileName = args.length == 1 ? args[0] : "nxt.trace";
+        String fileName = args.length == 1 ? args[0] : "nas.trace";
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line = reader.readLine();
             headers = line.split("\t");
@@ -153,7 +153,7 @@ public final class VerifyTrace {
                 long issuedAssetQuantity = assetEntry.getValue();
                 if (issuedAssetQuantity != Convert.nullToZero(accountAssetQuantities.get(assetId))) {
                     System.out.println("ERROR: asset " + assetId + " balances don't match, issued: "
-                            + issuedAssetQuantity
+                    		+ issuedAssetQuantity
                             + ", total of account balances: " + accountAssetQuantities.get(assetId));
                     failedAssets.add(assetId);
                 }

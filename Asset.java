@@ -28,8 +28,7 @@ public final class Asset {
         if (assets == null) {
             return Collections.emptyList();
         }
-        return Collections.unmodifiableList(assets);
-    }
+        return Collections.unmodifiableList(assets);    }
 
     static void addAsset(Long assetId, Long senderAccountId, String name, String description, int quantity) {
         Asset asset = new Asset(assetId, senderAccountId, name, description, quantity);

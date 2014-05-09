@@ -8,6 +8,7 @@ import nxt.util.Listener;
 import nxt.util.Listeners;
 import nxt.util.Logger;
 import nxt.util.ThreadPool;
+import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONStreamAware;
@@ -21,6 +22,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -34,7 +36,7 @@ final class TransactionProcessorImpl implements TransactionProcessor {
 
     private final ConcurrentMap<Long, TransactionImpl> doubleSpendingTransactions = new ConcurrentHashMap<>();
     private final ConcurrentMap<Long, TransactionImpl> unconfirmedTransactions = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, TransactionImpl> unconfirmedTransactionHashes = new ConcurrentHashMap<>();
+    private final Set<String> unconfirmedTransactionHashes = new ConcurrentHashSet<>();
     private final Collection<TransactionImpl> allUnconfirmedTransactions = Collections.unmodifiableCollection(unconfirmedTransactions.values());
     private final ConcurrentMap<Long, TransactionImpl> nonBroadcastedTransactions = new ConcurrentHashMap<>();
     private static class TransactionHashInfo {
@@ -63,9 +65,9 @@ final class TransactionProcessorImpl implements TransactionProcessor {
                         Iterator<TransactionImpl> iterator = unconfirmedTransactions.values().iterator();
                         while (iterator.hasNext()) {
                             TransactionImpl transaction = iterator.next();
-                            if (transaction.getExpiration() < curTime) {
-                                iterator.remove();
-                                unconfirmedTransactionHashes.remove(transaction.getHash());
+                            if (transaction.getExpiration() < curTime) {  
+                            	iterator.remove();
+                            	unconfirmedTransactionHashes.remove(transaction.getHash());
                                 transaction.undoUnconfirmed();
                                 removedUnconfirmedTransactions.add(transaction);
                             }
@@ -100,8 +102,8 @@ final class TransactionProcessorImpl implements TransactionProcessor {
 
                     int curTime = Convert.getEpochTime();
                     for (TransactionImpl transaction : nonBroadcastedTransactions.values()) {
-                        if (TransactionDb.hasTransaction(transaction.getId()) || transaction.getExpiration() < curTime) {
-                            nonBroadcastedTransactions.remove(transaction.getId());
+                    	if (TransactionDb.hasTransaction(transaction.getId()) || transaction.getExpiration() < curTime) {                            
+                    		nonBroadcastedTransactions.remove(transaction.getId());
                         } else if (transaction.getTimestamp() < curTime - 30) {
                             transactionsData.add(transaction.getJSONObject());
                         }
@@ -226,7 +228,7 @@ final class TransactionProcessorImpl implements TransactionProcessor {
             byte[] senderPublicKey = new byte[32];
             buffer.get(senderPublicKey);
             Long recipientId = buffer.getLong();
-            int amount = buffer.getInt();
+            Long amount = buffer.getLong();
             int fee = buffer.getInt();
             Long referencedTransactionId = Convert.zeroToNull(buffer.getLong());
             byte[] signature = new byte[64];
@@ -247,13 +249,13 @@ final class TransactionProcessorImpl implements TransactionProcessor {
 
     @Override
     public Transaction newTransaction(short deadline, byte[] senderPublicKey, Long recipientId,
-                                      int amount, int fee, Long referencedTransactionId) throws NxtException.ValidationException {
+                                      Long amount, int fee, Long referencedTransactionId) throws NxtException.ValidationException {
         return new TransactionImpl(TransactionType.Payment.ORDINARY, Convert.getEpochTime(), deadline, senderPublicKey, recipientId, amount, fee, referencedTransactionId, null);
     }
 
     @Override
     public Transaction newTransaction(short deadline, byte[] senderPublicKey, Long recipientId,
-                                      int amount, int fee, Long referencedTransactionId, Attachment attachment)
+                                      Long amount, int fee, Long referencedTransactionId, Attachment attachment)
             throws NxtException.ValidationException {
         TransactionImpl transaction = new TransactionImpl(attachment.getTransactionType(), Convert.getEpochTime(), deadline, senderPublicKey, recipientId, amount, fee,
                 referencedTransactionId, null);
@@ -272,7 +274,7 @@ final class TransactionProcessorImpl implements TransactionProcessor {
             byte[] senderPublicKey = Convert.parseHexString((String) transactionData.get("senderPublicKey"));
             Long recipientId = Convert.parseUnsignedLong((String) transactionData.get("recipient"));
             if (recipientId == null) recipientId = 0L; // ugly
-            int amount = ((Long)transactionData.get("amount")).intValue();
+            Long amount = ((Long)transactionData.get("amount"));
             int fee = ((Long)transactionData.get("fee")).intValue();
             Long referencedTransactionId = Convert.parseUnsignedLong((String) transactionData.get("referencedTransaction"));
             byte[] signature = Convert.parseHexString((String) transactionData.get("signature"));
@@ -321,7 +323,7 @@ final class TransactionProcessorImpl implements TransactionProcessor {
                 transactionHashes.remove(transaction.getHash());
             }
             unconfirmedTransactions.put(transaction.getId(), transaction);
-            unconfirmedTransactionHashes.put(transaction.getHash(), transaction);
+            unconfirmedTransactionHashes.add(transaction.getHash());
             transaction.undo();
             addedUnconfirmedTransactions.add(transaction);
         }
@@ -347,7 +349,7 @@ final class TransactionProcessorImpl implements TransactionProcessor {
                         transactionHashes.remove(transaction.getHash());
                     }
                 }
-            }
+            }  
             TransactionImpl removedUnconfirmed = unconfirmedTransactions.remove(duplicateTransaction.getId());
             if (removedUnconfirmed != null) {
                 unconfirmedTransactionHashes.remove(removedUnconfirmed.getHash());
@@ -366,7 +368,7 @@ final class TransactionProcessorImpl implements TransactionProcessor {
             addedConfirmedTransactions.add(transaction);
             Transaction removedTransaction = unconfirmedTransactions.remove(transaction.getId());
             if (removedTransaction != null) {
-                unconfirmedTransactionHashes.remove(transaction.getHash());
+            	unconfirmedTransactionHashes.remove(transaction.getHash());
                 removedUnconfirmedTransactions.add(removedTransaction);
             }
             // TODO: Remove from double-spending transactions
@@ -406,7 +408,7 @@ final class TransactionProcessorImpl implements TransactionProcessor {
                 transactions.add(parseTransaction((JSONObject) transactionData));
             } catch (NxtException.ValidationException e) {
                 if (! (e instanceof TransactionType.NotYetEnabledException)) {
-                    Logger.logDebugMessage("Dropping invalid transaction: " + e.getMessage());
+                	Logger.logDebugMessage("Dropping invalid transaction: " + e.getMessage());
                 }
             }
         }
@@ -442,8 +444,8 @@ final class TransactionProcessorImpl implements TransactionProcessor {
                     }
 
                     if (transactionHashes.containsKey(transaction.getHash())
-                            || unconfirmedTransactionHashes.containsKey(transaction.getHash())) {
-                        continue;
+                            || unconfirmedTransactionHashes.contains(transaction.getHash())) {
+                    	continue;
                     }
 
                     doubleSpendingTransaction = !transaction.applyUnconfirmed();
@@ -458,11 +460,11 @@ final class TransactionProcessorImpl implements TransactionProcessor {
                                         + " that we generated, will not forward to peers");
                                 nonBroadcastedTransactions.remove(id);
                             } else {
-                                sendToPeersTransactionsData.add(transaction.getJSONObject());
+                            	sendToPeersTransactionsData.add(transaction.getJSONObject());
                             }
                         }
                         unconfirmedTransactions.put(id, transaction);
-                        unconfirmedTransactionHashes.put(transaction.getHash(), transaction);
+                        unconfirmedTransactionHashes.add(transaction.getHash());
                         addedUnconfirmedTransactions.add(transaction);
                     }
                 }

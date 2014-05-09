@@ -54,11 +54,11 @@ abstract class CreateTransaction extends APIServlet.APIRequestHandler {
 
     final JSONStreamAware createTransaction(HttpServletRequest req, Account senderAccount, Attachment attachment)
         throws NxtException.ValidationException {
-        return createTransaction(req, senderAccount, Genesis.CREATOR_ID, 0, attachment);
+        return createTransaction(req, senderAccount, Genesis.CREATOR_ID, 0L, attachment);
     }
 
     final JSONStreamAware createTransaction(HttpServletRequest req, Account senderAccount, Long recipientId,
-                                            int amount, Attachment attachment) throws NxtException.ValidationException {
+                                            Long amount, Attachment attachment) throws NxtException.ValidationException {
         String deadlineValue = req.getParameter("deadline");
         String feeValue = req.getParameter("fee");
         String referencedTransactionValue = Convert.emptyToNull(req.getParameter("referencedTransaction"));

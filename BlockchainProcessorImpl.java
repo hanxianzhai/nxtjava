@@ -35,7 +35,7 @@ import java.util.TreeSet;
 
 final class BlockchainProcessorImpl implements BlockchainProcessor {
 
-    private static final byte[] CHECKSUM_TRANSPARENT_FORGING = new byte[]{27, -54, -59, -98, 49, -42, 48, -68, -112, 49, 41, 94, -41, 78, -84, 27, -87, -22, -28, 36, -34, -90, 112, -50, -9, 5, 89, -35, 80, -121, -128, 112};
+    private static final byte[] CHECKSUM_TRANSPARENT_FORGING = null;
 
     private static final BlockchainProcessorImpl instance = new BlockchainProcessorImpl();
 
@@ -406,7 +406,7 @@ final class BlockchainProcessorImpl implements BlockchainProcessor {
                 digest.update(transaction.getBytes());
             }
 
-            BlockImpl genesisBlock = new BlockImpl(-1, 0, null, 1000000000, 0, transactionsMap.size() * 128, digest.digest(),
+            BlockImpl genesisBlock = new BlockImpl(-1, 0, null, 10000000000L, 0, transactionsMap.size() * 128, digest.digest(),
                     Genesis.CREATOR_PUBLIC_KEY, new byte[64], Genesis.GENESIS_BLOCK_SIGNATURE, null, new ArrayList<>(transactionsMap.values()));
 
             genesisBlock.setPrevious(null);
@@ -632,7 +632,7 @@ final class BlockchainProcessorImpl implements BlockchainProcessor {
         Map<TransactionType, Set<String>> duplicates = new HashMap<>();
         Map<Long, Long> accumulatedAmounts = new HashMap<>();
 
-        int totalAmount = 0;
+        Long totalAmount = 0L;
         int totalFee = 0;
         int payloadLength = 0;
 
@@ -741,7 +741,7 @@ final class BlockchainProcessorImpl implements BlockchainProcessor {
             int version = ((Long)blockData.get("version")).intValue();
             int timestamp = ((Long)blockData.get("timestamp")).intValue();
             Long previousBlock = Convert.parseUnsignedLong((String) blockData.get("previousBlock"));
-            int totalAmount = ((Long)blockData.get("totalAmount")).intValue();
+            Long totalAmount = (Long)blockData.get("totalAmount");
             int totalFee = ((Long)blockData.get("totalFee")).intValue();
             int payloadLength = ((Long)blockData.get("payloadLength")).intValue();
             byte[] payloadHash = Convert.parseHexString((String) blockData.get("payloadHash"));

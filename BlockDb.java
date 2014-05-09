@@ -65,7 +65,7 @@ final class BlockDb {
             if (rs.wasNull()) {
                 previousBlockId = null;
             }
-            int totalAmount = rs.getInt("total_amount");
+            Long totalAmount = rs.getLong("total_amount");
             int totalFee = rs.getInt("total_fee");
             int payloadLength = rs.getInt("payload_length");
             byte[] generatorPublicKey = rs.getBytes("generator_public_key");
@@ -114,7 +114,7 @@ final class BlockDb {
                 } else {
                     pstmt.setNull(++i, Types.BIGINT);
                 }
-                pstmt.setInt(++i, block.getTotalAmount());
+                pstmt.setLong(++i, block.getTotalAmount());
                 pstmt.setInt(++i, block.getTotalFee());
                 pstmt.setInt(++i, block.getPayloadLength());
                 pstmt.setBytes(++i, block.getGeneratorPublicKey());
@@ -161,7 +161,7 @@ final class BlockDb {
                     pstmtDelete.executeUpdate();
                     con.commit();
                 }
-                rs.close();
+                rs.close();                
             } catch (SQLException e) {
                 con.rollback();
                 throw e;

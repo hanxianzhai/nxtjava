@@ -33,7 +33,7 @@ public final class SendMoney extends UserServlet.UserRequestHandler {
         String secretPhrase = req.getParameter("secretPhrase");
 
         Long recipient;
-        int amount = 0;
+        Long amount = 0L;
         int fee = 0;
         short deadline = 0;
 
@@ -41,7 +41,7 @@ public final class SendMoney extends UserServlet.UserRequestHandler {
 
             recipient = Convert.parseUnsignedLong(recipientValue);
             if (recipient == null) throw new IllegalArgumentException("invalid recipient");
-            amount = Integer.parseInt(amountValue.trim());
+            amount = Long.parseLong(amountValue.trim());
             fee = Integer.parseInt(feeValue.trim());
             deadline = (short)(Double.parseDouble(deadlineValue) * 60);
 

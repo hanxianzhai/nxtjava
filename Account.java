@@ -37,7 +37,7 @@ public final class Account {
         }
 
     }
-
+    
     private static final int maxTrackedBalanceConfirmations = 2881;
     private static final ConcurrentMap<Long, Account> accounts = new ConcurrentHashMap<>();
 
@@ -46,7 +46,7 @@ public final class Account {
     private static final Listeners<Account,Event> listeners = new Listeners<>();
 
     private static final Listeners<AccountAsset,Event> assetListeners = new Listeners<>();
-
+    
     public static boolean addListener(Listener<Account> listener, Event eventType) {
         return listeners.addListener(listener, eventType);
     }
@@ -61,8 +61,8 @@ public final class Account {
 
     public static boolean removeAssetListener(Listener<AccountAsset> listener, Event eventType) {
         return assetListeners.removeListener(listener, eventType);
-    }
-
+    }  
+    
     public static Collection<Account> getAllAccounts() {
         return allAccounts;
     }
